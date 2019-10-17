@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace DotsArena
+namespace DotClient
 {
     public class ClientManager
     {
@@ -101,7 +101,6 @@ namespace DotsArena
 
         public void Draw()
         {
-            
         }
     }
 }

@@ -6,7 +6,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 
-namespace DotsServer
+namespace DotServer
 {
     public class StateObject
     {
@@ -61,9 +61,8 @@ namespace DotsServer
                 }
             };
             Send(state.WorkSocket, packet);
-            
-            ServerManager.Instance.CreatePlayer(state.ClientId);
 
+            ServerManager.Instance.CreatePlayer(state.ClientId);
 
             Console.WriteLine("Accepted from {0}", handler.RemoteEndPoint);
 
@@ -98,6 +97,7 @@ namespace DotsServer
                         case Command.MOVE:
                             ServerManager.Instance.UpdatePlayer(state.ClientId, packet);
                             break;
+
                         case Command.FIRE:
                             ServerManager.Instance.HitTarget(state.ClientId, packet);
                             break;

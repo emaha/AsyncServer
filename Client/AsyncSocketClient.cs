@@ -4,22 +4,23 @@ using System;
 using System.IO;
 using System.Net.Sockets;
 
-namespace DotsArena
+namespace DotClient
 {
     public static class AsyncSocketClient
     {
         //private static int ClientId;
         private const int Port = 11000;
+
         private static Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         private static byte[] buffer = new byte[1024];
         public static bool IsAlive { get; private set; }
-
 
         private static void Connect()
         {
             try
             {
-                client.BeginConnect("127.0.0.1", Port, ConnectCallback, client);
+                //client.BeginConnect("127.0.0.1", Port, ConnectCallback, client);
+                client.BeginConnect("192.168.0.192", Port, ConnectCallback, client);
             }
             catch (Exception e)
             {

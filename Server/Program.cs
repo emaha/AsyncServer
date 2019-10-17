@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DotsServer
+namespace DotServer
 {
     internal class Program
     {

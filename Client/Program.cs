@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace DotsArena
+namespace DotClient
 {
     internal class Program
     {
