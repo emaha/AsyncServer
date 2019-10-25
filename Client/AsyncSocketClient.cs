@@ -12,15 +12,15 @@ namespace DotClient
         private const int Port = 11000;
 
         private static Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        private static byte[] buffer = new byte[1024];
+        private static byte[] buffer = new byte[1024]; // размера буфера в 1024 байта хватит примерно на 50-60 клиентов
         public static bool IsAlive { get; private set; }
 
         private static void Connect()
         {
             try
             {
-                //client.BeginConnect("127.0.0.1", Port, ConnectCallback, client);
-                client.BeginConnect("192.168.0.192", Port, ConnectCallback, client);
+                client.BeginConnect("127.0.0.1", Port, ConnectCallback, client);
+                //client.BeginConnect("192.168.0.192", Port, ConnectCallback, client);
             }
             catch (Exception e)
             {
@@ -89,18 +89,27 @@ namespace DotClient
                         case Command.ALL_PLAYER_STATES:
                             ClientManager.Instance.UpdateStates(packet.PlayersState);
                             break;
+
+                        case Command.PLAYER_DISCONNECTED:
+                            ClientManager.Instance.PlayerDisconnect(packet.Target);
+                            Console.WriteLine($"Dsc: {packet.Target.Id}");
+                            break;
                     }
 
                     socket.BeginReceive(buffer, 0, buffer.Length, 0, ReceiveCallback, socket);
                 }
             }
-            catch (Exception e)
+            catch (SocketException e)
             {
-                Console.WriteLine(e.Message);
                 Console.WriteLine("Disconnected2...");
                 socket.Shutdown(SocketShutdown.Both);
                 socket.Close();
                 IsAlive = false;
+                throw new Exception("SocketException", e);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
             }
         }
 

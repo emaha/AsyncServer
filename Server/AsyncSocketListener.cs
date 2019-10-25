@@ -21,6 +21,8 @@ namespace DotServer
         private static readonly List<StateObject> ClientStates = new List<StateObject>();
         private static int _clientCounter;
 
+        private static readonly object mutex = new object();
+
         public static void StartListening()
         {
             try
@@ -111,7 +113,20 @@ namespace DotServer
                 Console.WriteLine("Disconnected...");
                 socket.Shutdown(SocketShutdown.Both);
                 socket.Close();
-                ClientStates.Remove(state);
+
+                Packet packet = new Packet()
+                {
+                    Command = Command.PLAYER_DISCONNECTED,
+                    Target = ServerManager.Instance.GetPlayer(state.ClientId)
+                };
+
+                lock (mutex)
+                {
+                    ServerManager.Instance.RemovePlayer(state.ClientId);
+                    ClientStates.Remove(state);
+                }
+
+                SendToAll(packet);
             }
         }
 
@@ -146,17 +161,19 @@ namespace DotServer
             Serializer.Serialize(ms, data);
             byte[] byteData = ms.ToArray();
 
-            for (int i = 0; i < ClientStates.Count; i++)
+            lock (mutex)
             {
-                try
+                foreach (var client in ClientStates)
                 {
-                    var s = ClientStates[i].WorkSocket;
-                    s.BeginSend(byteData, 0, byteData.Length, 0, SendCallback, s);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                    ClientStates.RemoveAt(i--);
+                    try
+                    {
+                        var s = client.WorkSocket;
+                        s.BeginSend(byteData, 0, byteData.Length, 0, SendCallback, s);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
                 }
             }
         }

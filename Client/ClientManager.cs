@@ -12,95 +12,45 @@ namespace DotClient
         public static ClientManager Instance => _instance ?? (_instance = new ClientManager());
         private readonly ConcurrentDictionary<int, Character> _players = new ConcurrentDictionary<int, Character>();
 
+        private static readonly object mutex = new object();
+
         private int ClientId { get; set; }
-        private int x, y;
 
         public void InitPlayer(int clientId)
         {
             ClientId = clientId;
         }
 
-        public void Run()
-        {
-            while (AsyncSocketClient.IsAlive)
-            {
-                x++;
-                y++;
-                Thread.Sleep(1000);
-
-                Packet packet = new Packet
-                {
-                    Command = Command.MOVE,
-                    ClientPosition = new Vector2Int(x, y)
-                };
-
-                if (x % 10 == 0)
-                {
-                    TryToKillSomebody();
-                }
-
-                AsyncSocketClient.Send(packet);
-
-                Draw();
-            }
-            Console.WriteLine("Server unreachable. Exit");
-        }
-
-        public void ProcessHit(Packet packet)
-        {
-            if (packet.Target.Id == ClientId)
-            {
-                _players[ClientId].Health = packet.Target.Health;
-                Console.WriteLine($"I'm hitted. Health:{_players[ClientId].Health}");
-            }
-            else
-            {
-                Console.WriteLine($"Somebody hit the Player {packet.Target.Id}");
-            }
-        }
-
-        public void TryToKillSomebody()
-        {
-            Character target = null;
-            foreach (var item in _players)
-            {
-                if (item.Key != ClientId && item.Value.Health > 0)
-                {
-                    target = item.Value;
-                    break;
-                }
-            }
-
-            if (target != null)
-            {
-                Packet p = new Packet()
-                {
-                    Command = Command.FIRE,
-                    Target = target
-                };
-                Console.WriteLine($"I'm hitting Player {target.Id}");
-                AsyncSocketClient.Send(p);
-            }
-        }
-
         public void UpdateStates(List<Character> states)
         {
-            foreach (var item in states)
+            lock (mutex)
             {
-                if (_players.TryGetValue(item.Id, out var player))
+                foreach (var item in states)
                 {
-                    player.Position = item.Position;
-                    player.Health = item.Health;
-                }
-                else
-                {
-                    _players[item.Id] = item;
+                    if (_players.TryGetValue(item.Id, out var player))
+                    {
+                        player.Position = item.Position;
+                        player.Health = item.Health;
+                    }
+                    else
+                    {
+                        _players[item.Id] = item;
+                    }
                 }
             }
         }
 
-        public void Draw()
+        private void RemovePlayer(int clientId)
         {
+            lock (mutex)
+            {
+                _players.TryRemove(clientId, out _);
+            }
+        }
+
+        public void PlayerDisconnect(Character target)
+        {
+            RemovePlayer(target.Id);
         }
     }
 }

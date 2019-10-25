@@ -12,22 +12,25 @@ namespace Common
         [ProtoMember(1)]
         public Command Command { get; set; }
 
+        // Класс упаковывается в массив байт
+        // Свойства сериализуются если != null
+
         #region Полезная нагрузка пакета (Payload)
 
         /// <summary>
-        /// Данные о клиенте. Клиент->Сервер
+        /// Данные о клиенте. Клиент -> Сервер
         /// </summary>
         [ProtoMember(2)]
         public Vector2Int ClientPosition { get; set; }
 
         /// <summary>
-        /// Данные всех клиентов. Сервер->Клиент
+        /// Данные всех клиентов. Сервер -> Клиент
         /// </summary>
         [ProtoMember(3)]
         public List<Character> PlayersState { get; set; }
 
         /// <summary>
-        /// Данные инициализации клиента. Сервер->Клиент
+        /// Данные инициализации клиента. Сервер -> Клиент
         /// </summary>
         [ProtoMember(4)]
         public PlayerState InitData { get; set; }
@@ -44,6 +47,6 @@ namespace Common
         [ProtoMember(6)]
         public Character Target { get; set; }
 
-        #endregion Payload
+        #endregion Полезная нагрузка пакета (Payload)
     }
 }

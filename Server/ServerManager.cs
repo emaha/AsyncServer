@@ -2,6 +2,7 @@
 using Common;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace DotServer
@@ -45,6 +46,12 @@ namespace DotServer
             AsyncSocketListener.SendToAll(packet);
         }
 
+        public Character GetPlayer(int clientId)
+        {
+            _players.TryGetValue(clientId, out var character);
+            return character;
+        }
+
         public void UpdatePlayer(int clientId, Packet packet)
         {
             var pos = packet.ClientPosition;
@@ -57,6 +64,11 @@ namespace DotServer
             character.RecalculateStats();
 
             _players[clientId] = character;
+        }
+
+        public void RemovePlayer(int clientId)
+        {
+            _players.TryRemove(clientId, out _);
         }
     }
 }

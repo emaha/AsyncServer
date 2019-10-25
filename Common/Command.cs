@@ -36,15 +36,20 @@
         ALL_PLAYER_STATES = 5,
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         ALL_CREATURE_STATES = 6,
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         GAME_STATE = 7,
-        
+
+        /// <summary>
+        ///
+        /// </summary>
+        PLAYER_DISCONNECTED = 8,
+
         /// <summary>
         ///
         /// </summary>
