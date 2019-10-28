@@ -8,9 +8,10 @@ namespace DotClient
         private static void Main(string[] args)
         {
             Thread.Sleep(2000);
-            AsyncSocketClient.StartClient();
+            var manager = new GameManager();
+            AsyncSocketClient.StartClient(manager);
 
-            ClientManager.Instance.Run();
+            manager.Run();
 
             Console.ReadLine();
         }

@@ -1,19 +1,15 @@
-﻿using System;
-using Common;
+﻿using Common;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 
 namespace DotServer
 {
     public class ServerManager
     {
-        private static ServerManager _instance;
-        public static ServerManager Instance => _instance ?? (_instance = new ServerManager());
         private readonly ConcurrentDictionary<int, Character> _players = new ConcurrentDictionary<int, Character>();
 
-        public void Loop()
+        public void Run()
         {
             while (true)
             {

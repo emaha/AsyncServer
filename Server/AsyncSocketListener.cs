@@ -22,9 +22,11 @@ namespace DotServer
         private static int _clientCounter;
 
         private static readonly object mutex = new object();
+        private static ServerManager _serverManager;
 
-        public static void StartListening()
+        public static void StartListening(ServerManager sm)
         {
+            _serverManager = sm;
             try
             {
                 Listener.Bind(new IPEndPoint(IPAddress.Any, 11000));
@@ -50,7 +52,10 @@ namespace DotServer
                 ClientId = _clientCounter++,
                 WorkSocket = handler
             };
-            ClientStates.Add(state);
+            lock (mutex)
+            {
+                ClientStates.Add(state);
+            }
 
             // Init player
             Packet packet = new Packet()
@@ -64,7 +69,7 @@ namespace DotServer
             };
             Send(state.WorkSocket, packet);
 
-            ServerManager.Instance.CreatePlayer(state.ClientId);
+            _serverManager.CreatePlayer(state.ClientId);
 
             Console.WriteLine("Accepted from {0}", handler.RemoteEndPoint);
 
@@ -97,32 +102,33 @@ namespace DotServer
                             break;
 
                         case Command.MOVE:
-                            ServerManager.Instance.UpdatePlayer(state.ClientId, packet);
+                            _serverManager.UpdatePlayer(state.ClientId, packet);
                             break;
 
                         case Command.FIRE:
-                            ServerManager.Instance.HitTarget(state.ClientId, packet);
+                            _serverManager.HitTarget(state.ClientId, packet);
                             break;
                     }
                 }
 
                 socket.BeginReceive(state.Buffer, 0, state.Buffer.Length, SocketFlags.None, ReceiveCallback, state);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Console.WriteLine("Disconnected...");
+                Console.WriteLine($"Disconnected...{ex.Message}");
                 socket.Shutdown(SocketShutdown.Both);
                 socket.Close();
 
-                Packet packet = new Packet()
+                Packet packet = new Packet
                 {
                     Command = Command.PLAYER_DISCONNECTED,
-                    Target = ServerManager.Instance.GetPlayer(state.ClientId)
+                    Target = _serverManager.GetPlayer(state.ClientId)
                 };
 
                 lock (mutex)
                 {
-                    ServerManager.Instance.RemovePlayer(state.ClientId);
+                    Console.WriteLine($"Remove {state.ClientId}");
+                    _serverManager.RemovePlayer(state.ClientId);
                     ClientStates.Remove(state);
                 }
 
@@ -137,12 +143,12 @@ namespace DotServer
             {
                 socket = (Socket)ar.AsyncState;
                 int bytesSent = socket.EndSend(ar);
-                //Console.WriteLine($"Sent {bytesSent} bytes to client.");
             }
             catch (Exception e)
             {
                 socket.Shutdown(SocketShutdown.Both);
                 socket.Close();
+                Console.WriteLine("Sendcallback error");
                 Console.WriteLine(e.ToString());
             }
         }
@@ -172,7 +178,7 @@ namespace DotServer
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e.Message);
+                        //Console.WriteLine(e.Message);
                     }
                 }
             }

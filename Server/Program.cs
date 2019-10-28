@@ -6,9 +6,10 @@ namespace DotServer
     {
         private static void Main(string[] args)
         {
-            AsyncSocketListener.StartListening();
+            ServerManager serverManager = new ServerManager();
+            AsyncSocketListener.StartListening(serverManager);
 
-            ServerManager.Instance.Loop();
+            serverManager.Run();
 
             Console.WriteLine("\nPress ENTER to continue...");
             Console.ReadLine();

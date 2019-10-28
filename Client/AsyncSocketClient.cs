@@ -15,6 +15,8 @@ namespace DotClient
         private static byte[] buffer = new byte[1024]; // размера буфера в 1024 байта хватит примерно на 50-60 клиентов
         public static bool IsAlive { get; private set; }
 
+        private static GameManager _gameManager;
+
         private static void Connect()
         {
             try
@@ -31,9 +33,10 @@ namespace DotClient
             Console.WriteLine("Connected");
         }
 
-        public static void StartClient()
+        public static void StartClient(GameManager gm)
 
         {
+            _gameManager = gm;
             Connect();
         }
 
@@ -73,7 +76,7 @@ namespace DotClient
                             break;
 
                         case Command.INIT:
-                            ClientManager.Instance.InitPlayer(packet.InitData.Id);
+                            _gameManager.InitPlayer(packet.InitData.Id);
                             Console.WriteLine($"init: my id = {packet.InitData.Id}");
                             break;
 
@@ -83,15 +86,15 @@ namespace DotClient
                             break;
 
                         case Command.FIRE:
-                            ClientManager.Instance.ProcessHit(packet);
+                            _gameManager.ProcessHit(packet);
                             break;
 
                         case Command.ALL_PLAYER_STATES:
-                            ClientManager.Instance.UpdateStates(packet.PlayersState);
+                            _gameManager.UpdateStates(packet.PlayersState);
                             break;
 
                         case Command.PLAYER_DISCONNECTED:
-                            ClientManager.Instance.PlayerDisconnect(packet.Target);
+                            _gameManager.PlayerDisconnect(packet.Target);
                             Console.WriteLine($"Dsc: {packet.Target.Id}");
                             break;
                     }
