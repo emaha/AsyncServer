@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using SFML.System;
 
 namespace DotServer
 {
@@ -9,28 +10,47 @@ namespace DotServer
     {
         private readonly ConcurrentDictionary<int, Character> _players = new ConcurrentDictionary<int, Character>();
 
+        private bool isRunning = true;
+        private Time accum = Time.Zero;
+        private Clock clock = new Clock();
+        private Time ups = Time.FromSeconds(1.0f / 60.0f);
+
         public void Run()
         {
-            while (true)
+            while (isRunning)
             {
-                Thread.Sleep(2000);
-
-                List<Character> list = new List<Character>();
-                foreach (var item in _players)
+                while (accum > ups)
                 {
-                    list.Add(item.Value);
+                    accum -= ups;
+
+                    // UpdateLogic();
                 }
 
-                Packet packet = new Packet()
-                {
-                    Command = Command.ALL_PLAYER_STATES,
-                    PlayersState = list
-                };
-                if (list.Count > 0)
-                {
-                    AsyncSocketListener.SendToAll(packet);
-                }
+                accum += clock.Restart();
+
+                //Thread.Sleep(2000);
+
+                //List<Character> list = new List<Character>();
+                //foreach (var item in _players)
+                //{
+                //    list.Add(item.Value);
+                //}
+
+                //Packet packet = new Packet()
+                //{
+                //    Command = Command.ALL_PLAYER_STATES,
+                //    PlayersState = list
+                //};
+                //if (list.Count > 0)
+                //{
+                //    AsyncSocketListener.SendToAll(packet);
+                //}
             }
+        }
+
+        public void Stop()
+        {
+            isRunning = false;
         }
 
         public void HitTarget(int clientId, Packet packet)

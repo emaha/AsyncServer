@@ -53,6 +53,11 @@
         /// <summary>
         ///
         /// </summary>
+        DISCONNECT = 9,
+
+        /// <summary>
+        ///
+        /// </summary>
         PING = 90,
 
         /// <summary>

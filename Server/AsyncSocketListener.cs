@@ -108,6 +108,10 @@ namespace DotServer
                         case Command.FIRE:
                             _serverManager.HitTarget(state.ClientId, packet);
                             break;
+
+                        case Command.DISCONNECT:
+                            DisconnectClient(state, socket);
+                            break;
                     }
                 }
 
@@ -116,24 +120,28 @@ namespace DotServer
             catch (Exception ex)
             {
                 Console.WriteLine($"Disconnected...{ex.Message}");
-                socket.Shutdown(SocketShutdown.Both);
-                socket.Close();
-
-                Packet packet = new Packet
-                {
-                    Command = Command.PLAYER_DISCONNECTED,
-                    Target = _serverManager.GetPlayer(state.ClientId)
-                };
-
-                lock (mutex)
-                {
-                    Console.WriteLine($"Remove {state.ClientId}");
-                    _serverManager.RemovePlayer(state.ClientId);
-                    ClientStates.Remove(state);
-                }
-
-                SendToAll(packet);
+                DisconnectClient(state, socket);
             }
+        }
+
+        private static void DisconnectClient(StateObject state, Socket socket)
+        {
+            socket.Shutdown(SocketShutdown.Both);
+            socket.Close();
+            lock (mutex)
+            {
+                Console.WriteLine($"Remove {state.ClientId}");
+                _serverManager.RemovePlayer(state.ClientId);
+                ClientStates.Remove(state);
+            }
+
+            Packet packet = new Packet
+            {
+                Command = Command.PLAYER_DISCONNECTED,
+                Target = _serverManager.GetPlayer(state.ClientId)
+            };
+
+            SendToAll(packet);
         }
 
         private static void SendCallback(IAsyncResult ar)
