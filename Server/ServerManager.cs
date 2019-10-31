@@ -1,8 +1,8 @@
-﻿using Common;
+﻿using System;
+using Common;
+using SFML.System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
-using SFML.System;
 
 namespace DotServer
 {
@@ -10,47 +10,68 @@ namespace DotServer
     {
         private readonly ConcurrentDictionary<int, Character> _players = new ConcurrentDictionary<int, Character>();
 
-        private bool isRunning = true;
-        private Time accum = Time.Zero;
-        private Clock clock = new Clock();
-        private Time ups = Time.FromSeconds(1.0f / 60.0f);
+        private ObjectManager objectManager = new ObjectManager();
 
+        private bool _isRunning = true;
+        private Time _accum = Time.Zero;
+        private readonly Clock _clock = new Clock();
+        private readonly Time _ups = Time.FromSeconds(1.0f / 60.0f);
+
+        private int _sendAllCounter = 0;
+
+        /// <summary>
+        /// Основной цикл
+        /// </summary>
         public void Run()
         {
-            while (isRunning)
+            while (_isRunning)
             {
-                while (accum > ups)
+                while (_accum >= _ups)
                 {
-                    accum -= ups;
+                    UpdateLogic();
 
-                    // UpdateLogic();
+                    SendDataToAll();
+
+                    _accum -= _ups;
                 }
 
-                accum += clock.Restart();
-
-                //Thread.Sleep(2000);
-
-                //List<Character> list = new List<Character>();
-                //foreach (var item in _players)
-                //{
-                //    list.Add(item.Value);
-                //}
-
-                //Packet packet = new Packet()
-                //{
-                //    Command = Command.ALL_PLAYER_STATES,
-                //    PlayersState = list
-                //};
-                //if (list.Count > 0)
-                //{
-                //    AsyncSocketListener.SendToAll(packet);
-                //}
+                _accum += _clock.Restart();
             }
+        }
+
+        private void SendDataToAll()
+        {
+            // 3 раза в секунду
+            if (_sendAllCounter++ != 20) return;
+
+            List<Character> list = new List<Character>();
+            foreach (var item in _players)
+            {
+                list.Add(item.Value);
+            }
+
+            Packet packet = new Packet()
+            {
+                Command = Command.ALL_PLAYER_STATES,
+                PlayersState = list
+            };
+            if (list.Count > 0)
+            {
+                AsyncSocketListener.SendToAll(packet);
+            }
+
+            Console.WriteLine("Send");
+            _sendAllCounter = 0;
+        }
+
+        private void UpdateLogic()
+        {
+            objectManager.Update();
         }
 
         public void Stop()
         {
-            isRunning = false;
+            _isRunning = false;
         }
 
         public void HitTarget(int clientId, Packet packet)

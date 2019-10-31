@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncSocketListener.cs" />
+    <Compile Include="ObjectManager.cs" />
     <Compile Include="ServerManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

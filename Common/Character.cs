@@ -12,6 +12,7 @@ namespace Common
 
         [ProtoMember(2)]
         public int Health { get; set; }
+
         [ProtoMember(3)]
         public int Energy { get; set; }
 
@@ -20,24 +21,37 @@ namespace Common
 
         [ProtoIgnore]
         public int Armor { get; set; }
+
         [ProtoIgnore]
         public Stats BaseStats { get; set; }
+
         [ProtoIgnore]
         public Stats AdditionalStats { get; set; }
+
         [ProtoIgnore]
         public int Damage { get; set; }
+
         [ProtoIgnore]
         public int CritRate { get; set; }
+
         [ProtoIgnore]
         public int CarryWeight { get; set; }
+
         [ProtoIgnore]
         public int Sight { get; set; }
+
         [ProtoIgnore]
         public List<Item> Inventory;
+
         [ProtoIgnore]
         public List<Effect> Effects;
 
-        public Character() { }
+        [ProtoIgnore]
+        public bool IsAlive => Health > 0;
+
+        public Character()
+        {
+        }
 
         public Character(int clientId)
         {
@@ -47,15 +61,19 @@ namespace Common
                 Strength = 5,
                 Perception = 5,
                 Endurance = 5,
-                Agility = 5,
                 Charisma = 5,
                 Intelligence = 5,
+                Agility = 5,
                 Luck = 5
             };
             Inventory = new List<Item>();
             Effects = new List<Effect>();
             Health = BaseStats.Endurance * 25;
-            Position = new Vector2Int(0,0);
+            Position = new Vector2Int(0, 0);
+        }
+
+        public void Update()
+        {
         }
 
         public void TickEffects()
@@ -73,7 +91,6 @@ namespace Common
             if (rand <= CritRate)
             {
                 dmg = Damage * 2;
-                Console.WriteLine("Crit!!!");
             }
             else
             {
@@ -90,12 +107,6 @@ namespace Common
             {
                 Health -= res;
             }
-            else
-            {
-                res = 0;
-            }
-            Console.WriteLine($"Player {Id} hitted, {res}dmg, hp:{Health}");
-            if (Health <= 0) Console.WriteLine($"i'm dead");
         }
 
         public void RecalculateStats()
