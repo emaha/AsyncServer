@@ -2,8 +2,12 @@
 
 namespace Common
 {
+    public enum EffectType { POSITIVE, NEGATIVE }
+
     public abstract class Effect
     {
+        public EffectType EffectType { get; set; }
+
         protected Effect()
         {
         }

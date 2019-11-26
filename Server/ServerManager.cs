@@ -10,7 +10,7 @@ namespace DotServer
     {
         private readonly ConcurrentDictionary<int, Character> _players = new ConcurrentDictionary<int, Character>();
 
-        private ObjectManager objectManager = new ObjectManager();
+        private readonly GameManager _gameManager = new GameManager();
 
         private bool _isRunning = true;
         private Time _accum = Time.Zero;
@@ -30,7 +30,7 @@ namespace DotServer
                 {
                     UpdateLogic();
 
-                    SendDataToAll();
+                    // SendDataToAll();
 
                     _accum -= _ups;
                 }
@@ -66,7 +66,7 @@ namespace DotServer
 
         private void UpdateLogic()
         {
-            objectManager.Update();
+            _gameManager.Update();
         }
 
         public void Stop()

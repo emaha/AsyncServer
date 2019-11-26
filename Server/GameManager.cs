@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DotServer
 {
-    public class ObjectManager
+    public class GameManager
     {
         private List<Character> Characters = new List<Character>();
         private List<Item> Items = new List<Item>();

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using ProtoBuf;
 
 namespace Common
@@ -42,6 +44,9 @@ namespace Common
 
         [ProtoIgnore]
         public List<Item> Inventory;
+
+        [ProtoIgnore]
+        public List<Item> EquippedItems;
 
         [ProtoIgnore]
         public List<Effect> Effects;
@@ -107,6 +112,28 @@ namespace Common
             {
                 Health -= res;
             }
+        }
+
+        public void Equip(Item item)
+        {
+            Inventory.Remove(item);
+
+            var equippedItem = EquippedItems.First(x => x.Slot == item.Slot);
+            if (equippedItem != null)
+            {
+                UnEquip(equippedItem);
+            }
+            EquippedItems.Add(item);
+
+            RecalculateStats();
+        }
+
+        public void UnEquip(Item item)
+        {
+            EquippedItems.Remove(item);
+            Inventory.Add(item);
+
+            RecalculateStats();
         }
 
         public void RecalculateStats()
