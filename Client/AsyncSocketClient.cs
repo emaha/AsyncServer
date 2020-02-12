@@ -63,44 +63,44 @@ namespace DotClient
             {
                 int received = socket.EndReceive(ar);
 
-                if (received > 0)
+                if (received == 0) return;
+
+                MemoryStream ms = new MemoryStream(buffer, 0, received);
+                Packet packet = Serializer.Deserialize<Packet>(ms);
+
+                switch (packet.Command)
                 {
-                    MemoryStream ms = new MemoryStream(buffer, 0, received);
-                    Packet packet = Serializer.Deserialize<Packet>(ms);
+                    case Command.PING:
+                        Send(packet);
+                        Console.WriteLine("ping");
+                        break;
 
-                    switch (packet.Command)
-                    {
-                        case Command.PING:
-                            Send(packet);
-                            Console.WriteLine("ping");
-                            break;
+                    case Command.INIT:
+                        _gameManager.InitPlayer(packet.InitData.Id);
+                        Console.WriteLine($"init: my id = {packet.InitData.Id}");
+                        break;
 
-                        case Command.INIT:
-                            _gameManager.InitPlayer(packet.InitData.Id);
-                            Console.WriteLine($"init: my id = {packet.InitData.Id}");
-                            break;
+                    case Command.MESSAGE:
+                        string content = packet.Message;
+                        Console.WriteLine($"Message from server: {content}");
+                        break;
 
-                        case Command.MESSAGE:
-                            string content = packet.Message;
-                            Console.WriteLine($"Message from server: {content}");
-                            break;
+                    case Command.FIRE:
+                        _gameManager.ProcessHit(packet);
+                        break;
 
-                        case Command.FIRE:
-                            _gameManager.ProcessHit(packet);
-                            break;
+                    case Command.ALL_PLAYER_STATES:
+                        _gameManager.UpdateStates(packet.PlayersState);
+                        Console.WriteLine($"Received {received} bytes");
+                        break;
 
-                        case Command.ALL_PLAYER_STATES:
-                            _gameManager.UpdateStates(packet.PlayersState);
-                            break;
-
-                        case Command.PLAYER_DISCONNECTED:
-                            _gameManager.PlayerDisconnect(packet.Target);
-                            Console.WriteLine($"Dsc: {packet.Target.Id}");
-                            break;
-                    }
-
-                    socket.BeginReceive(buffer, 0, buffer.Length, 0, ReceiveCallback, socket);
+                    case Command.PLAYER_DISCONNECTED:
+                        _gameManager.PlayerDisconnect(packet.Target);
+                        Console.WriteLine($"Dsc: {packet.Target.Id}");
+                        break;
                 }
+
+                socket.BeginReceive(buffer, 0, buffer.Length, 0, ReceiveCallback, socket);
             }
             catch (SocketException e)
             {
@@ -113,6 +113,7 @@ namespace DotClient
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
+                throw;
             }
         }
 

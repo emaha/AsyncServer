@@ -30,7 +30,7 @@ namespace DotServer
                 {
                     UpdateLogic();
 
-                    // SendDataToAll();
+                    SendDataToAll();
 
                     _accum -= _ups;
                 }

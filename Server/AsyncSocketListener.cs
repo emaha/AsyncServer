@@ -58,10 +58,10 @@ namespace DotServer
             }
 
             // Init player
-            Packet packet = new Packet()
+            Packet packet = new Packet
             {
                 Command = Command.INIT,
-                InitData = new PlayerState()
+                InitData = new PlayerState
                 {
                     Id = state.ClientId,
                     Position = new Vector2Int(0, 0)
@@ -128,12 +128,6 @@ namespace DotServer
         {
             socket.Shutdown(SocketShutdown.Both);
             socket.Close();
-            lock (mutex)
-            {
-                Console.WriteLine($"Remove {state.ClientId}");
-                _serverManager.RemovePlayer(state.ClientId);
-                ClientStates.Remove(state);
-            }
 
             Packet packet = new Packet
             {
@@ -142,6 +136,13 @@ namespace DotServer
             };
 
             SendToAll(packet);
+
+            lock (mutex)
+            {
+                Console.WriteLine($"Remove {state.ClientId}");
+                _serverManager.RemovePlayer(state.ClientId);
+                ClientStates.Remove(state);
+            }
         }
 
         private static void SendCallback(IAsyncResult ar)
