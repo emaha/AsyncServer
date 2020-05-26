@@ -3,7 +3,7 @@
     /// <summary>
     ///
     /// </summary>
-    public enum Command : byte
+    public enum MessageType : byte
     {
         /// <summary>
         ///

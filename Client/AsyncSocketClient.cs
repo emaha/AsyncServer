@@ -1,5 +1,5 @@
 ﻿using Common;
-using ProtoBuf;
+using MessagePack;
 using System;
 using System.IO;
 using System.Net.Sockets;
@@ -62,43 +62,11 @@ namespace DotClient
             try
             {
                 int received = socket.EndReceive(ar);
-
                 if (received == 0) return;
 
-                MemoryStream ms = new MemoryStream(buffer, 0, received);
-                Packet packet = Serializer.Deserialize<Packet>(ms);
+                Packet packet = MessagePackSerializer.Deserialize<Packet>(buffer);
 
-                switch (packet.Command)
-                {
-                    case Command.PING:
-                        Send(packet);
-                        Console.WriteLine("ping");
-                        break;
-
-                    case Command.INIT:
-                        _gameManager.InitPlayer(packet.InitData.Id);
-                        Console.WriteLine($"init: my id = {packet.InitData.Id}");
-                        break;
-
-                    case Command.MESSAGE:
-                        string content = packet.Message;
-                        Console.WriteLine($"Message from server: {content}");
-                        break;
-
-                    case Command.FIRE:
-                        _gameManager.ProcessHit(packet);
-                        break;
-
-                    case Command.ALL_PLAYER_STATES:
-                        _gameManager.UpdateStates(packet.PlayersState);
-                        Console.WriteLine($"Received {received} bytes");
-                        break;
-
-                    case Command.PLAYER_DISCONNECTED:
-                        _gameManager.PlayerDisconnect(packet.Target);
-                        Console.WriteLine($"Dsc: {packet.Target.Id}");
-                        break;
-                }
+                Invoke(packet);
 
                 socket.BeginReceive(buffer, 0, buffer.Length, 0, ReceiveCallback, socket);
             }
@@ -108,24 +76,56 @@ namespace DotClient
                 socket.Shutdown(SocketShutdown.Both);
                 socket.Close();
                 IsAlive = false;
-                throw new Exception("SocketException", e);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                throw;
+                IsAlive = false;
             }
         }
 
-        public static void Send(Packet data)
+        private static void Invoke(Packet packet)
         {
-            MemoryStream ms = new MemoryStream();
-            Serializer.Serialize(ms, data);
-            byte[] byteData = ms.ToArray();
+            switch (packet.Type)
+            {
+                case MessageType.PING:
+                    //Send(packet);
+                    Console.WriteLine("ping");
+                    break;
+
+                case MessageType.INIT:
+                    //_gameManager.InitPlayer(packet.InitData.Id);
+                    Console.WriteLine($"init: my id = ");
+                    break;
+
+                case MessageType.MESSAGE:
+                    //string content = packet.Message;
+                    //Console.WriteLine($"Message from server: {content}");
+                    break;
+
+                case MessageType.FIRE:
+                    //_gameManager.ProcessHit(packet);
+                    break;
+
+                case MessageType.ALL_PLAYER_STATES:
+                    //_gameManager.UpdateStates(packet.PlayersState);
+                    Console.WriteLine($"Received  bytes");
+                    break;
+
+                case MessageType.PLAYER_DISCONNECTED:
+                    //_gameManager.PlayerDisconnect(packet.Target);
+                    //Console.WriteLine($"Dsc: {packet.Target.Id}");
+                    break;
+            }
+        }
+
+        public static void Send(Packet packet)
+        {
+            byte[] data = MessagePackSerializer.Serialize(packet);
 
             if (IsAlive)
             {
-                client.BeginSend(byteData, 0, byteData.Length, 0, SendCallback, client);
+                client.BeginSend(data, 0, data.Length, 0, SendCallback, client);
             }
         }
 

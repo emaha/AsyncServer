@@ -6,6 +6,6 @@
 
   <ItemGroup>
     <PackageReference Include="Graphnode.SFML.Net" Version="2.4.0" />
-    <PackageReference Include="protobuf-net" Version="2.4.0" />
+    <PackageReference Include="MessagePack" Version="2.1.115" />
   </ItemGroup>
 </Project>

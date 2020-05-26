@@ -1,14 +1,14 @@
-﻿using ProtoBuf;
+﻿using MessagePack;
 
 namespace Common
 {
-    [ProtoContract]
-    public class PlayerState
+    [MessagePackObject]
+    public class PlayerInfo
     {
-        [ProtoMember(1)]
+        [Key(1)]
         public int Id { get; set; }
 
-        [ProtoMember(2)]
+        [Key(2)]
         public Vector2Int Position { get; set; }
     }
 }

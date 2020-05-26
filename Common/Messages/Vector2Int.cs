@@ -1,8 +1,8 @@
-﻿using ProtoBuf;
+﻿using MessagePack;
 
 namespace Common
 {
-    [ProtoContract]
+    [MessagePackObject]
     public class Vector2Int
     {
         public Vector2Int() { }
@@ -13,10 +13,10 @@ namespace Common
             Y = y;
         }
 
-        [ProtoMember(1)]
+        [Key(1)]
         public int X { get; set; }
 
-        [ProtoMember(2)]
+        [Key(2)]
         public int Y { get; set; }
 
     }

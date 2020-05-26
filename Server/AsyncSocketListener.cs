@@ -1,8 +1,7 @@
 ﻿using Common;
-using ProtoBuf;
+using MessagePack;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
 
@@ -60,12 +59,8 @@ namespace DotServer
             // Init player
             Packet packet = new Packet
             {
-                Command = Command.INIT,
-                InitData = new PlayerState
-                {
-                    Id = state.ClientId,
-                    Position = new Vector2Int(0, 0)
-                }
+                Type = MessageType.INIT,
+                Position = new Vector2Int(0, 0)
             };
             Send(state.WorkSocket, packet);
 
@@ -88,28 +83,33 @@ namespace DotServer
 
                 if (received > 0)
                 {
-                    MemoryStream ms = new MemoryStream(state.Buffer, 0, received);
-                    Packet packet = Serializer.Deserialize<Packet>(ms);
+                    Packet packet = MessagePackSerializer.Deserialize<Packet>(state.Buffer);
+                    
 
-                    switch (packet.Command)
+                    //byte[] data = new byte[received - MessageConfig.MESSAGE_LEN];
+                    //Array.Copy(state.Buffer, 1, data, 0, data.Length);
+
+                    switch (packet.Type)
                     {
-                        case Command.PING:
+                        case MessageType.PING:
                             Console.WriteLine($"PING");
                             break;
 
-                        case Command.MESSAGE:
-                            Console.WriteLine($"Message from client: {packet.Message}");
+                        case MessageType.MESSAGE:
+                            Console.WriteLine($"Message from client: ");
                             break;
 
-                        case Command.MOVE:
-                            _serverManager.UpdatePlayer(state.ClientId, packet);
+                        case MessageType.MOVE:
+                            var data = packet.Position;
+                            _serverManager.UpdatePlayer(state.ClientId, data);
                             break;
 
-                        case Command.FIRE:
-                            _serverManager.HitTarget(state.ClientId, packet);
+                        case MessageType.FIRE:
+                            var hitData = new byte[0];
+                            _serverManager.HitTarget(state.ClientId, hitData);
                             break;
 
-                        case Command.DISCONNECT:
+                        case MessageType.DISCONNECT:
                             DisconnectClient(state, socket);
                             break;
                     }
@@ -131,10 +131,9 @@ namespace DotServer
 
             Packet packet = new Packet
             {
-                Command = Command.PLAYER_DISCONNECTED,
-                Target = _serverManager.GetPlayer(state.ClientId)
+                Type = MessageType.PLAYER_DISCONNECTED,
+                Character = _serverManager.GetPlayer(state.ClientId)
             };
-
             SendToAll(packet);
 
             lock (mutex)
@@ -162,19 +161,15 @@ namespace DotServer
             }
         }
 
-        private static void Send(Socket socket, Packet data)
+        private static void Send(Socket socket, Packet packet)
         {
-            MemoryStream ms = new MemoryStream();
-            Serializer.Serialize(ms, data);
-            byte[] byteData = ms.ToArray();
+            byte[] byteData = MessagePackSerializer.Serialize(packet);
             socket.BeginSend(byteData, 0, byteData.Length, 0, SendCallback, socket);
         }
 
-        public static void SendToAll(Packet data)
+        public static void SendToAll(Packet packet)
         {
-            MemoryStream ms = new MemoryStream();
-            Serializer.Serialize(ms, data);
-            byte[] byteData = ms.ToArray();
+            byte[] byteData = MessagePackSerializer.Serialize(packet);
 
             lock (mutex)
             {

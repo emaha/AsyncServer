@@ -1,4 +1,5 @@
 ﻿using Common;
+using MessagePack;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -57,8 +58,8 @@ namespace DotClient
 
                 Packet packet = new Packet
                 {
-                    Command = Command.MOVE,
-                    ClientPosition = new Vector2Int(0, 0)
+                    Type = MessageType.MOVE,
+                    Position = new Vector2Int(0, 0)
                 };
 
                 AsyncSocketClient.Send(packet);

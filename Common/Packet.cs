@@ -1,52 +1,33 @@
-﻿using ProtoBuf;
+﻿using MessagePack;
 using System.Collections.Generic;
 
 namespace Common
 {
-    [ProtoContract]
+    [MessagePackObject]
     public class Packet
     {
         /// <summary>
-        /// Команда
+        /// Тип сообщения
         /// </summary>
-        [ProtoMember(1)]
-        public Command Command { get; set; }
-
-        // Класс упаковывается в массив байт
-        // Свойства сериализуются если != null
-
-        #region Полезная нагрузка пакета (Payload)
+        [Key(1)]
+        public MessageType Type { get; set; }
 
         /// <summary>
-        /// Данные о клиенте. Клиент -> Сервер
+        /// Нагрузка
         /// </summary>
-        [ProtoMember(2)]
-        public Vector2Int ClientPosition { get; set; }
+        [Key(2)]
+        public Vector2Int Position { get; set; }
 
         /// <summary>
-        /// Данные всех клиентов. Сервер -> Клиент
+        /// 
         /// </summary>
-        [ProtoMember(3)]
-        public List<Character> PlayersState { get; set; }
+        [Key(3)]
+        public Character Character { get; set; }
 
         /// <summary>
-        /// Данные инициализации клиента. Сервер -> Клиент
+        /// /
         /// </summary>
-        [ProtoMember(4)]
-        public PlayerState InitData { get; set; }
-
-        /// <summary>
-        /// Текстовое сообщение. Оба направления
-        /// </summary>
-        [ProtoMember(5)]
-        public string Message { get; set; }
-
-        /// <summary>
-        /// Цель любых действий
-        /// </summary>
-        [ProtoMember(6)]
-        public Character Target { get; set; }
-
-        #endregion Полезная нагрузка пакета (Payload)
+        [Key(4)]
+        public List<Character> Characters { get; set; }
     }
 }

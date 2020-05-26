@@ -1,56 +1,56 @@
-﻿using ProtoBuf;
+﻿using MessagePack;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Common
 {
-    [ProtoContract]
+    [MessagePackObject]
     public class Character
     {
-        [ProtoMember(1)]
+        [Key(1)]
         public int Id { get; set; }
 
-        [ProtoMember(2)]
+        [Key(2)]
         public int Health { get; set; }
 
-        [ProtoMember(3)]
+        [Key(3)]
         public int Energy { get; set; }
 
-        [ProtoMember(4)]
+        [Key(4)]
         public Vector2Int Position { get; set; }
 
-        [ProtoIgnore]
+        [IgnoreMember]
         public int Armor { get; set; }
 
-        [ProtoIgnore]
+        [IgnoreMember]
         public Stats BaseStats { get; set; }
 
-        [ProtoIgnore]
+        [IgnoreMember]
         public Stats AdditionalStats { get; set; }
 
-        [ProtoIgnore]
+        [IgnoreMember]
         public int Damage { get; set; }
 
-        [ProtoIgnore]
+        [IgnoreMember]
         public int CritRate { get; set; }
 
-        [ProtoIgnore]
+        [IgnoreMember]
         public int CarryWeight { get; set; }
 
-        [ProtoIgnore]
+        [IgnoreMember]
         public int Sight { get; set; }
 
-        [ProtoIgnore]
+        [IgnoreMember]
         public List<Item> Inventory;
 
-        [ProtoIgnore]
+        [IgnoreMember]
         public List<Item> EquippedItems;
 
-        [ProtoIgnore]
+        [IgnoreMember]
         public List<Effect> Effects;
 
-        [ProtoIgnore]
+        [IgnoreMember]
         public bool IsAlive => Health > 0;
 
         public Character()

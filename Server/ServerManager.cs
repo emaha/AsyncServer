@@ -3,6 +3,7 @@ using Common;
 using SFML.System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using MessagePack;
 
 namespace DotServer
 {
@@ -50,10 +51,10 @@ namespace DotServer
                 list.Add(item.Value);
             }
 
-            Packet packet = new Packet()
+            Packet packet = new Packet
             {
-                Command = Command.ALL_PLAYER_STATES,
-                PlayersState = list
+                Type = MessageType.ALL_PLAYER_STATES,
+                Characters = list
             };
             if (list.Count > 0)
             {
@@ -74,13 +75,14 @@ namespace DotServer
             _isRunning = false;
         }
 
-        public void HitTarget(int clientId, Packet packet)
+        public void HitTarget(int clientId, byte[] packet)
         {
-            var player = _players[clientId];
-            var target = _players[packet.Target.Id];
-            player.Hit(target);
-            packet.Target.Health = target.Health;
-            AsyncSocketListener.SendToAll(packet);
+
+            //var player = _players[clientId];
+            //var target = _players[packet.Target.Id];
+            //player.Hit(target);
+            //packet.Target.Health = target.Health;
+            //AsyncSocketListener.SendToAll(packet);
         }
 
         public Character GetPlayer(int clientId)
@@ -89,10 +91,9 @@ namespace DotServer
             return character;
         }
 
-        public void UpdatePlayer(int clientId, Packet packet)
+        public void UpdatePlayer(int clientId, Vector2Int data)
         {
-            var pos = packet.ClientPosition;
-            _players[clientId].Position = new Vector2Int(pos.X, pos.Y);
+            _players[clientId].Position = data;
         }
 
         public void CreatePlayer(int clientId)
